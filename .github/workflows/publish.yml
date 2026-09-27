@@ -1,0 +1,50 @@
+name: publish
+
+# claude/posts ブランチに新しい投稿フォルダが push されたら、Instagram と X に投稿する
+on:
+  push:
+    branches: [claude/posts]
+    paths: ["posts/**"]
+  workflow_dispatch:
+    inputs:
+      dirs:
+        description: "手動で投稿するフォルダ（空白区切り。例: posts/2026-10-01）"
+        required: true
+
+concurrency: publish
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests requests-oauthlib
+      - name: 新しい投稿フォルダを探す
+        id: find
+        run: |
+          if [ -n "${{ github.event.inputs.dirs }}" ]; then
+            echo "dirs=${{ github.event.inputs.dirs }}" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE=$(git merge-base origin/main HEAD)
+          fi
+          # 今回の push で post.json が「追加」されたフォルダだけを対象にする（再投稿防止）
+          DIRS=$(git diff --name-only --diff-filter=A "$BEFORE" "${{ github.sha }}" -- 'posts/*/post.json' | xargs -r -n1 dirname | sort -u | tr '\n' ' ')
+          echo "対象: $DIRS"
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+      - name: 投稿
+        if: steps.find.outputs.dirs != ''
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+        run: python scripts/publish.py ${{ steps.find.outputs.dirs }}

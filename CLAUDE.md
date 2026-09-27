@@ -1,0 +1,54 @@
+# AI救急 SNS自動投稿
+
+株式会社ドコデモどあ（代表：飯田宏之）が運営する「AI救急」の Instagram / X 投稿を毎日作るリポジトリ。
+目的は**仕事の受注**：投稿 → プロフィール → DM「診断」→ 無料診断15分 → 受注。
+
+- Instagram / X: `@ai_emergency_jp`
+- 投稿は `claude/posts` ブランチに `posts/YYYY-MM-DD/` を push すると、GitHub Actions（`.github/workflows/publish.yml`）が自動で投稿する。
+- Claude はキー類を持たない。投稿そのものは Actions が行う。
+
+## 毎日の手順（クラウドの定期実行で行う）
+
+0. `bash scripts/setup.sh` で道具（画像書き出し・日本語フォント・ffmpeg）を準備する。
+1. `git fetch origin claude/posts` し、存在すれば `git checkout claude/posts`（`origin/main` を取り込む：`git merge --no-edit origin/main`）。存在しなければ `git checkout -b claude/posts`。
+2. 今日の日付（Asia/Tokyo）を `TZ=Asia/Tokyo date +%F` で取得。`posts/<今日>/` が既にあれば**何もせず終了**（二重投稿防止）。
+3. 投稿内容を決める：
+   - `content/queue/NN.json` のうち、`posts/*/post.json` の `source` にまだ `queue:NN` が無いものがあれば、**一番小さい番号**を `posts/<今日>/post.json` にコピーし、`date` と `source`（`queue:NN`）を書き込んで使う（内容は変えない）。
+   - queue を使い切ったら、`content/themes.md` の曜日テーマに沿って新しく作る。直近14日分の `posts/*/post.json` を読み、同じ切り口・同じ見出しを避ける。
+4. `content/rules.md`（厳守）、`content/brand.md`、`content/facts.md` を読んだうえで `posts/<今日>/post.json` を書く（形式は下記）。
+5. `python scripts/render.py posts/<今日>` で画像（と reel なら動画）を作る。
+6. **できた画像を全部 Read で目視確認**する。文字のはみ出し・不自然な改行・重なり・誤字があれば post.json を直して再生成。問題がなくなるまで繰り返す。
+7. `git add posts/<今日> && git commit -m "post: <今日> <テーマ>" && git push origin claude/posts`
+8. 最後に、作った投稿の要約（テーマ・見出し・X本文）を出力して終了。
+
+## post.json の形式
+
+```json
+{
+  "date": "2026-10-01",
+  "source": "queue:01 | theme:火",
+  "type": "carousel",
+  "theme": "止まる原因の解説",
+  "slides": [
+    {"kind": "cover", "tag": "よくある原因", "title": "…\n[[強調]]", "lead": "…→"},
+    {"kind": "list", "tag": "…", "title": "…", "items": ["…"], "icon": "q", "lead": "…"},
+    {"kind": "cta"}
+  ],
+  "caption_ig": "キャプション本文（改行可）",
+  "hashtags": ["GAS", "業務効率化"],
+  "x_text": "Xの本文（140字目安・URL禁止）"
+}
+```
+
+- `type`: `carousel`（画像2〜10枚）または `reel`（スライドを動画化。3〜6枚、1枚3秒）。
+- スライドの `kind`：
+  - `cover` {tag, title, lead, size?, mock?{label, bars[], error}} … 表紙（紺）
+  - `list` {tag, title, items[], icon: x|v|q, lead, dark?} … 箇条書き（x=症状 v=できる q=チェック）
+  - `steps` {tag, title, items[{h,p}], lead, rank?, start?} … 番号付き
+  - `grid` {tag, title, items[{h,p}]×4, lead}
+  - `prices` {tag, title, items[{n,d,y}], lead}
+  - `qa` {tag, title, items[{q,a}]}
+  - `message` {tag, text, lead, size?, brand?} … 大きな一言（リール向き）
+  - `cta` {} … 最後のお申し込み案内（**必ず最後に1枚**）
+- 記法：`[[強調]]`=赤字、`**太字**`、`\n`=改行。
+- 文字量の目安：cover の title は1行11字×3行まで。list は4項目・1項目18字まで。steps は3〜4項目。
