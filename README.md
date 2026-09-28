@@ -9,7 +9,7 @@
 ## キー（GitHub → Settings → Secrets and variables → Actions）
 | 名前 | 中身 |
 |---|---|
-| IG_USER_ID | Instagram ビジネスアカウントのID |
+| IG_USER_ID | （任意）Instagram ビジネスアカウントのID。未設定ならトークンから自動で探す |
 | IG_ACCESS_TOKEN | Meta のシステムユーザーのアクセストークン（無期限） |
 | X_API_KEY / X_API_SECRET | X アプリの API Key / Secret |
 | X_ACCESS_TOKEN / X_ACCESS_SECRET | X の Access Token / Secret（読み書き権限） |

@@ -53,8 +53,20 @@ def ig_wait(container_id, tries=40):
     raise RuntimeError("Instagram の処理がタイムアウトしました")
 
 
+def ig_user_id():
+    # IG_USER_ID が未設定なら、トークンで管理しているFacebookページから Instagram ビジネスアカウントを探す
+    if os.environ.get("IG_USER_ID"):
+        return os.environ["IG_USER_ID"]
+    pages = ig_call("GET", "me/accounts", fields="name,instagram_business_account").get("data", [])
+    for p in pages:
+        if p.get("instagram_business_account"):
+            print(f"[Instagram] ページ「{p['name']}」の Instagram アカウントを使用")
+            return p["instagram_business_account"]["id"]
+    raise RuntimeError("トークンから Instagram ビジネスアカウントが見つかりません（ページとIGのリンク・権限を確認）")
+
+
 def post_instagram(post_dir, spec):
-    uid = os.environ["IG_USER_ID"]
+    uid = ig_user_id()
     caption = spec["caption_ig"].strip()
     if spec.get("hashtags"):
         caption += "\n\n" + " ".join("#" + h.lstrip("#") for h in spec["hashtags"])
@@ -101,7 +113,7 @@ def main(dirs):
     for d in dirs:
         d = d.rstrip("/")
         spec = json.loads(Path(d, "post.json").read_text(encoding="utf-8"))
-        jobs = [("Instagram", ("IG_USER_ID", "IG_ACCESS_TOKEN"), post_instagram),
+        jobs = [("Instagram", ("IG_ACCESS_TOKEN",), post_instagram),
                 ("X", ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET"), post_x)]
         for name, keys, fn in jobs:
             if not has(*keys):
