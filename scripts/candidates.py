@@ -92,8 +92,7 @@ def main():
         out += ["", "<details><summary>取得できなかったタグ</summary>", ""] + [f"- {e}" for e in errors] + ["</details>"]
     print("\n".join(out))
     if errors:
-        print("
-".join(errors), file=sys.stderr)
+        print("\n".join(errors), file=sys.stderr)
     if errors and not items:
         sys.exit(1)
 
