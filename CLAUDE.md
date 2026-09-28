@@ -11,15 +11,43 @@
 
 0. `bash scripts/setup.sh` で道具（画像書き出し・日本語フォント・ffmpeg）を準備する。
 1. `git fetch origin claude/posts` し、存在すれば `git checkout claude/posts`（`origin/main` を取り込む：`git merge --no-edit origin/main`）。存在しなければ `git checkout -b claude/posts`。
-2. 今日の日付（Asia/Tokyo）を `TZ=Asia/Tokyo date +%F` で取得。`posts/<今日>/` が既にあれば**何もせず終了**（二重投稿防止）。
+2. 今日の日付（Asia/Tokyo）を `TZ=Asia/Tokyo date +%F` で取得。`posts/<今日>/` が既にあれば、**投稿づくり（3〜6）は飛ばして 7 へ**（二重投稿防止）。
 3. 投稿内容を決める：
    - `content/queue/NN.json` のうち、`posts/*/post.json` の `source` にまだ `queue:NN` が無いものがあれば、**一番小さい番号**を `posts/<今日>/post.json` にコピーし、`date` と `source`（`queue:NN`）を書き込んで使う（内容は変えない）。
    - queue を使い切ったら、`content/themes.md` の曜日テーマに沿って新しく作る。直近14日分の `posts/*/post.json` を読み、同じ切り口・同じ見出しを避ける。
 4. `content/rules.md`（厳守）、`content/brand.md`、`content/facts.md` を読んだうえで `posts/<今日>/post.json` を書く（形式は下記）。
 5. `python scripts/render.py posts/<今日>` で画像（と reel なら動画）を作る。
 6. **できた画像を全部 Read で目視確認**する。文字のはみ出し・不自然な改行・重なり・誤字があれば post.json を直して再生成。問題がなくなるまで繰り返す。
-7. `git add posts/<今日> && git commit -m "post: <今日> <テーマ>" && git push origin claude/posts`
-8. 最後に、作った投稿の要約（テーマ・見出し・X本文）を出力して終了。
+7. **フォロー候補を探す**（下の「フォロー候補の探し方」）。`candidates/<今日>.md` が既にあれば飛ばす。
+8. `git add posts candidates && git commit -m "post: <今日> <テーマ>" && git push origin claude/posts`（変更が無ければ何もしない）
+9. 最後に、作った投稿の要約（テーマ・見出し・X本文）と、候補の件数を出力して終了。
+
+## フォロー候補の探し方（毎朝・0円）
+
+飯田さんが手動でフォロー・コメント・返信するための候補リストを作る。**フォローやコメント自体は絶対にしない**（規約違反）。
+
+1. WebSearch で、次のような検索を**毎日3〜5本**行う（毎日少しずつ言葉を変える。業種は themes.md の順番で回す）：
+   - Instagram の事業者：`site:instagram.com 塾長 個別指導`、`site:instagram.com ネットショップ 店主 発送`、`site:instagram.com 小さな会社 社長 日常` など
+   - 困りごとの投稿：`GAS エラー 動かない 困った`、`スプレッドシート 自動 集計 止まった`、`お問い合わせフォーム 届かない WordPress 困った`、`ChatGPT で作った スクリプト 動かない` など（X・note・ブログ・Q&Aサイト）
+2. 見つかったページから、**5〜8件**選ぶ。選ぶ基準：
+   - ○ お店・教室・小さな会社そのもののアカウント、または事業者本人が困りごとを書いている投稿
+   - × 「支援」「コンサル」「集客」「制作」「DX」などを売る側（同業者）、個人の私生活アカウント、1年以上前の投稿、企業の大手アカウント
+   - 直近30日の `candidates/*.md` に出したURLは除く
+3. `candidates/<今日>.md` を次の形で書く（個人情報は書かない。公開URLと、公開されている事業の種類だけ）：
+
+```markdown
+## フォロー候補（MM/DD）
+
+- [ ] **1. 学習塾（Instagram）** https://...
+  - 理由：教室運営の日常を投稿している塾のアカウント
+  - コメント案：「〇〇の取り組み、生徒さんのやる気が出そうですね」
+- [ ] **2. 困りごと（X）** https://...
+  - 内容：GASのトリガーが急に止まったと投稿
+  - 返信案：「実行ログにエラーが出ていないか見てみてください。権限の再承認で直ることも多いです」
+```
+
+   - コメント・返信案は**役に立つ一言だけ**。宣伝・DM誘導・「AI救急」の名前は入れない。
+   - 1件も見つからなければ「今日は見つかりませんでした」と書く。
 
 ## post.json の形式
 
