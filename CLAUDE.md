@@ -48,6 +48,20 @@
 
    - コメント・返信案は**役に立つ一言だけ**。宣伝・DM誘導・「AI救急」の名前は入れない。
    - 1件も見つからなければ「今日は見つかりませんでした」と書く。
+4. X の投稿はネット検索にほとんど出ないので、**リストの最後に必ず次の「X の検索リンク」をそのまま付ける**（飯田さんが押すだけで最新の困りごと投稿が見られる）：
+
+```markdown
+---
+### X で困っている人を探す（押すと最新の投稿が出ます）
+- [GAS エラー](https://x.com/search?q=GAS%20%E3%82%A8%E3%83%A9%E3%83%BC%20lang%3Aja%20-filter%3Alinks&f=live)
+- [GAS 動かない](https://x.com/search?q=GAS%20%E5%8B%95%E3%81%8B%E3%81%AA%E3%81%84%20lang%3Aja%20-filter%3Alinks&f=live)
+- [スプレッドシート 動かなくなった](https://x.com/search?q=%E3%82%B9%E3%83%97%E3%83%AC%E3%83%83%E3%83%89%E3%82%B7%E3%83%BC%E3%83%88%20%E5%8B%95%E3%81%8B%E3%81%AA%E3%81%8F%E3%81%AA%E3%81%A3%E3%81%9F%20lang%3Aja%20-filter%3Alinks&f=live)
+- [問い合わせフォーム 届かない](https://x.com/search?q=%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%20%E5%B1%8A%E3%81%8B%E3%81%AA%E3%81%84%20lang%3Aja%20-filter%3Alinks&f=live)
+- [ChatGPT GAS 動かない](https://x.com/search?q=ChatGPT%20GAS%20%E5%8B%95%E3%81%8B%E3%81%AA%E3%81%84%20lang%3Aja%20-filter%3Alinks&f=live)
+- [自動化 止まった 困った](https://x.com/search?q=%E8%87%AA%E5%8B%95%E5%8C%96%20%E6%AD%A2%E3%81%BE%E3%81%A3%E3%81%9F%20%E5%9B%B0%E3%81%A3%E3%81%9F%20lang%3Aja%20-filter%3Alinks&f=live)
+
+返信は「役に立つ一言」だけ。売り込み・DM誘導はしない（プロフィールを見て、向こうから来てもらう）。
+```
 
 ## post.json の形式
 
