@@ -1,10 +1,10 @@
 name: candidates
 
-# 毎朝 7:30（日本時間）に Instagram のフォロー候補リストを Issue で届ける（フォロー自体はしない）
+# claude/posts に candidates/*.md が追加されたら、その内容を Issue にして届ける（メール通知が飛ぶ）
 on:
-  schedule:
-    - cron: "30 22 * * *"
-  workflow_dispatch:
+  push:
+    branches: [claude/posts]
+    paths: ["candidates/**"]
 
 permissions:
   contents: read
@@ -15,20 +15,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - run: pip install requests
-      - name: 候補を集める
-        env:
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-        run: python scripts/candidates.py > body.md
-      - name: 前日までの候補Issueを閉じて、今日のIssueを作る
+          fetch-depth: 0
+      - name: 追加された候補ファイルを Issue にする
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE=$(git merge-base origin/main HEAD)
+          fi
+          FILES=$(git diff --name-only --diff-filter=A "$BEFORE" "${{ github.sha }}" -- 'candidates/*.md')
+          [ -z "$FILES" ] && { echo "新しい候補なし"; exit 0; }
           gh label create candidates --color 0e8a16 --description "フォロー候補" 2>/dev/null || true
           for n in $(gh issue list --label candidates --state open --json number -q '.[].number'); do
             gh issue close "$n" --comment "新しい候補リストに入れ替えました" >/dev/null
           done
-          gh issue create --title "フォロー候補 $(TZ=Asia/Tokyo date +%m/%d)" --label candidates --body-file body.md
+          for f in $FILES; do
+            d=$(basename "$f" .md)
+            gh issue create --title "フォロー候補 $d" --label candidates --body-file "$f"
+          done
