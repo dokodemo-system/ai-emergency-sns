@@ -129,9 +129,15 @@ def render(post_dir, reel=False):
     from playwright.sync_api import sync_playwright
     from PIL import Image
     channel = os.environ.get("RENDER_CHANNEL")  # ローカルWindowsなら msedge
+    exe = os.environ.get("RENDER_CHROMIUM_PATH")  # プリインストール済みChromiumを使う場合
     outs = []
     with sync_playwright() as p:
-        b = p.chromium.launch(channel=channel) if channel else p.chromium.launch()
+        if exe:
+            b = p.chromium.launch(executable_path=exe)
+        elif channel:
+            b = p.chromium.launch(channel=channel)
+        else:
+            b = p.chromium.launch()
         pg = b.new_page(viewport={"width": 1080, "height": 1350})
         for i in range(1, len(spec["slides"]) + 1):
             pg.goto(page.as_uri() + f"?s={i}")

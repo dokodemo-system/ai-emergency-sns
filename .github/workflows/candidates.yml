@@ -5,6 +5,11 @@ on:
   push:
     branches: [claude/posts]
     paths: ["candidates/**"]
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Issueにする候補ファイル（例: candidates/2026-09-30.md）"
+        required: true
 
 permissions:
   contents: read
@@ -21,11 +26,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ -n "${{ github.event.inputs.file }}" ]; then
+            FILES="${{ github.event.inputs.file }}"
+          else
           BEFORE="${{ github.event.before }}"
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
             BEFORE=$(git merge-base origin/main HEAD)
           fi
           FILES=$(git diff --name-only --diff-filter=A "$BEFORE" "${{ github.sha }}" -- 'candidates/*.md')
+          fi
           [ -z "$FILES" ] && { echo "新しい候補なし"; exit 0; }
           gh label create candidates --color 0e8a16 --description "フォロー候補" 2>/dev/null || true
           for n in $(gh issue list --label candidates --state open --json number -q '.[].number'); do
@@ -33,5 +42,7 @@ jobs:
           done
           for f in $FILES; do
             d=$(basename "$f" .md)
-            gh issue create --title "フォロー候補 $d" --label candidates --body-file "$f"
+            # ボットが作ったIssueは通知が飛ばないことがあるため、担当者に指定＋メンションで通知を確実にする
+            { echo "@${{ github.repository_owner }} 今日のフォロー候補です。"; echo; cat "$f"; } > body.md
+            gh issue create --title "フォロー候補 $d" --label candidates --assignee "${{ github.repository_owner }}" --body-file body.md
           done
