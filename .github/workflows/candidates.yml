@@ -28,6 +28,7 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.file }}" ]; then
             FILES="${{ github.event.inputs.file }}"
+            [ -f "$FILES" ] || { mkdir -p candidates; git show "origin/claude/posts:$FILES" > "$FILES"; }
           else
           BEFORE="${{ github.event.before }}"
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
