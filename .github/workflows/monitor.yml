@@ -51,4 +51,4 @@ jobs:
           printf "@%s 自動投稿の確認で問題が見つかりました（%s）。\n\n%b\n\nこの会話（Claude）で「要確認のメールが来た」と伝えれば調べます。\n\n- 実行の記録: %s/actions\n- 定期実行: https://claude.ai/code/routines\n" \
             "$OWNER" "$D" "$PROBLEMS" "${{ github.server_url }}/${{ github.repository }}" > alert.md
           gh label create alert --color d73a4a --description "自動確認で問題" 2>/dev/null || true
-          gh issue create --title "⚠ 要確認：自動投稿 $D" --label alert --assignee "$OWNER" --body-file alert.md
+          gh issue create --title "⚠ 要確認：自動投稿 $D" --label alert --body-file alert.md

@@ -43,7 +43,7 @@ jobs:
           done
           for f in $FILES; do
             d=$(basename "$f" .md)
-            # ボットが作ったIssueは通知が飛ばないことがあるため、担当者に指定＋メンションで通知を確実にする
+            # ボットが作ったIssueは通知が飛ばないため、本文でメンションして通知する（担当者指定は通知が2通になるので付けない）
             { echo "@${{ github.repository_owner }} 今日のフォロー候補です。"; echo; cat "$f"; } > body.md
-            gh issue create --title "フォロー候補 $d" --label candidates --assignee "${{ github.repository_owner }}" --body-file body.md
+            gh issue create --title "フォロー候補 $d" --label candidates --body-file body.md
           done
