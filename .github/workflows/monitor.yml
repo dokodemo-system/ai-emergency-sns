@@ -1,0 +1,54 @@
+name: monitor
+
+# 毎朝 7:30（日本時間）に、今日の自動投稿・フォロー候補がちゃんと出たかを確認し、
+# 問題があれば「⚠ 要確認」Issue を作って通知する（問題がなければ何もしない）
+on:
+  schedule:
+    - cron: "30 22 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "確認する日付（例: 2026-09-30）。空なら今日"
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 今日の結果を確認
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          D="${{ github.event.inputs.date }}"
+          [ -z "$D" ] && D=$(TZ=Asia/Tokyo date +%F)
+          SINCE=$(date -u -d "$D 00:00 +0900" +%Y-%m-%dT%H:%M:%SZ)
+          PROBLEMS=""
+
+          if ! git cat-file -e "origin/claude/posts:posts/$D/post.json" 2>/dev/null; then
+            PROBLEMS="$PROBLEMS\n- 今日の投稿（posts/$D）が作られていません（クラウドの定期実行が失敗した可能性）"
+          else
+            OK=$(gh run list -w publish.yml -L 20 --json conclusion,createdAt \
+              -q "[.[] | select(.createdAt >= \"$SINCE\" and .conclusion == \"success\")] | length")
+            [ "$OK" -gt 0 ] || PROBLEMS="$PROBLEMS\n- Instagram / X への投稿（publish）が成功していません"
+          fi
+
+          if ! gh issue list --label candidates --state all -L 5 --json title -q '.[].title' | grep -q "フォロー候補 $D"; then
+            PROBLEMS="$PROBLEMS\n- フォロー候補（$D）のリストが作られていません"
+          fi
+
+          if [ -z "$PROBLEMS" ]; then
+            echo "問題なし: $D"; exit 0
+          fi
+          printf "@%s 自動投稿の確認で問題が見つかりました（%s）。\n\n%b\n\nこの会話（Claude）で「要確認のメールが来た」と伝えれば調べます。\n\n- 実行の記録: %s/actions\n- 定期実行: https://claude.ai/code/routines\n" \
+            "$OWNER" "$D" "$PROBLEMS" "${{ github.server_url }}/${{ github.repository }}" > alert.md
+          gh label create alert --color d73a4a --description "自動確認で問題" 2>/dev/null || true
+          gh issue create --title "⚠ 要確認：自動投稿 $D" --label alert --assignee "$OWNER" --body-file alert.md
