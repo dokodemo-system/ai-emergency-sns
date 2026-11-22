@@ -4,6 +4,8 @@ import sys
 
 import requests
 
+import x_oauth2
+
 GRAPH = f"https://graph.facebook.com/{os.environ.get('GRAPH_VERSION', 'v23.0')}"
 ok = True
 
@@ -40,13 +42,19 @@ if os.environ.get("IG_ACCESS_TOKEN"):
 else:
     print("[Instagram] キー未設定")
 
-if all(os.environ.get(k) for k in ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET")):
+if x_oauth2.enabled():
+    try:
+        print(f"[X] 投稿先: @{x_oauth2.whoami(x_oauth2.access_token())}（OAuth 2.0）")
+    except Exception as e:
+        ok = False
+        print(f"::error::[X] OAuth 2.0 での確認に失敗: {e}")
+elif all(os.environ.get(k) for k in ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET")):
     from requests_oauthlib import OAuth1
     auth = OAuth1(os.environ["X_API_KEY"], os.environ["X_API_SECRET"],
                   os.environ["X_ACCESS_TOKEN"], os.environ["X_ACCESS_SECRET"])
     r = requests.get("https://api.x.com/2/users/me", auth=auth, timeout=60)
     if r.status_code == 200:
-        print(f"[X] 投稿先: @{r.json()['data']['username']}")
+        print(f"[X] 投稿先: @{r.json()['data']['username']}（OAuth 1.0a・2027-01-31 で終了）")
     else:
         ok = False
         print(f"::error::[X] キーの確認に失敗 {r.status_code}: {r.text}")

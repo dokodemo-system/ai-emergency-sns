@@ -1,8 +1,11 @@
 name: check
 
 # キーの動作確認（投稿はしない）。Actions タブから手動で実行する。
+# X を OAuth 2.0 で確認するとリフレッシュトークンが入れ替わるため、publish と同時には動かさない。
 on:
   workflow_dispatch:
+
+concurrency: publish
 
 jobs:
   check:
@@ -19,4 +22,8 @@ jobs:
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          X_CLIENT_ID: ${{ secrets.X_CLIENT_ID }}
+          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
+          X_REFRESH_TOKEN: ${{ secrets.X_REFRESH_TOKEN }}
+          SECRETS_PAT: ${{ secrets.SECRETS_PAT }}
         run: python scripts/check.py
