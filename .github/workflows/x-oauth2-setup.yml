@@ -1,0 +1,26 @@
+name: x-oauth2-setup
+
+# X の認証を OAuth 2.0 に切り替える（最初の1回だけ、Actions タブから手動で実行）。
+# 今の OAuth 1.0a のキーを OAuth 2.0 のトークンに交換し、X_REFRESH_TOKEN を Secrets に保存する。
+# 投稿はしない（最後に @ユーザー名 を取得して確認するだけ）。
+on:
+  workflow_dispatch:
+
+concurrency: publish
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - env:
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          X_CLIENT_ID: ${{ secrets.X_CLIENT_ID }}
+          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
+          SECRETS_PAT: ${{ secrets.SECRETS_PAT }}
+        run: python scripts/x_oauth2.py setup

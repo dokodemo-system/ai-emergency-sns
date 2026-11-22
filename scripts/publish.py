@@ -13,7 +13,9 @@ from pathlib import Path
 
 import requests
 
-REPO = os.environ.get("GITHUB_REPOSITORY", "dokodemo-system/ai-emergency-sns")
+import x_oauth2
+
+REPO =os.environ.get("GITHUB_REPOSITORY", "dokodemo-system/ai-emergency-sns")
 SHA = os.environ.get("GITHUB_SHA", "main")
 GRAPH = f"https://graph.facebook.com/{os.environ.get('GRAPH_VERSION', 'v23.0')}"
 
@@ -91,17 +93,26 @@ def post_instagram(post_dir, spec):
 
 
 # ---------- X ----------
+X_OAUTH1_KEYS = ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET")
+
+
 def post_x(post_dir, spec):
-    from requests_oauthlib import OAuth1
     text = spec["x_text"].strip()
     if "http://" in text or "https://" in text:
         raise RuntimeError("X投稿にURLを含めない（リンク付きは高額課金のため）")
-    auth = OAuth1(os.environ["X_API_KEY"], os.environ["X_API_SECRET"],
-                  os.environ["X_ACCESS_TOKEN"], os.environ["X_ACCESS_SECRET"])
-    r = requests.post("https://api.x.com/2/tweets", json={"text": text}, auth=auth, timeout=60)
+    if x_oauth2.enabled():
+        # 新しい方式（OAuth 2.0）。X_REFRESH_TOKEN が設定されていればこちらを使う
+        kw = {"headers": {"Authorization": f"Bearer {x_oauth2.access_token()}"}}
+        how = "OAuth 2.0"
+    else:
+        # 旧方式（OAuth 1.0a）。2027-01-31 で使えなくなる
+        from requests_oauthlib import OAuth1
+        kw = {"auth": OAuth1(*(os.environ[k] for k in X_OAUTH1_KEYS))}
+        how = "OAuth 1.0a"
+    r = requests.post("https://api.x.com/2/tweets", json={"text": text}, timeout=60, **kw)
     if r.status_code >= 400:
         raise RuntimeError(f"X API エラー {r.status_code}: {r.text}")
-    print(f"[X] 投稿しました: {post_dir} id={r.json()['data']['id']}")
+    print(f"[X] 投稿しました（{how}）: {post_dir} id={r.json()['data']['id']}")
 
 
 def has(*names):
@@ -113,10 +124,10 @@ def main(dirs):
     for d in dirs:
         d = d.rstrip("/")
         spec = json.loads(Path(d, "post.json").read_text(encoding="utf-8"))
-        jobs = [("Instagram", ("IG_ACCESS_TOKEN",), post_instagram),
-                ("X", ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET"), post_x)]
-        for name, keys, fn in jobs:
-            if not has(*keys):
+        jobs = [("Instagram", lambda: has("IG_ACCESS_TOKEN"), post_instagram),
+                ("X", lambda: x_oauth2.enabled() or has(*X_OAUTH1_KEYS), post_x)]
+        for name, ready, fn in jobs:
+            if not ready():
                 print(f"[{name}] キー未設定のためスキップ: {d}")
                 continue
             try:
