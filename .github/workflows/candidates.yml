@@ -1,6 +1,6 @@
 name: candidates
 
-# claude/posts に candidates/*.md が追加されたら、その内容を Issue にして届ける（メール通知が飛ぶ）
+# claude/posts に candidates/*.md が追加されたら、その内容を Issue にする（メール通知はしない）
 on:
   push:
     branches: [claude/posts]
@@ -43,7 +43,7 @@ jobs:
           done
           for f in $FILES; do
             d=$(basename "$f" .md)
-            # ボットが作ったIssueは通知が飛ばないため、本文でメンションして通知する（担当者指定は通知が2通になるので付けない）
-            { echo "@${{ github.repository_owner }} 今日のフォロー候補です。"; echo; cat "$f"; } > body.md
+            # メール通知は不要とのこと（2026-11-23）。メンションしない＝通知は飛ばない
+            { echo "今日のフォロー候補です。"; echo; cat "$f"; } > body.md
             gh issue create --title "フォロー候補 $d" --label candidates --body-file body.md
           done
