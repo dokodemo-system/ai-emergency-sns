@@ -41,6 +41,7 @@ jobs:
       - name: 投稿
         if: steps.find.outputs.dirs != ''
         env:
+          X_PAUSED: ${{ vars.X_PAUSED }}  # true にすると X への投稿だけ止まる（Instagram は続く）
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           X_API_KEY: ${{ secrets.X_API_KEY }}

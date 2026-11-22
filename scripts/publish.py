@@ -127,6 +127,9 @@ def main(dirs):
         jobs = [("Instagram", lambda: has("IG_ACCESS_TOKEN"), post_instagram),
                 ("X", lambda: x_oauth2.enabled() or has(*X_OAUTH1_KEYS), post_x)]
         for name, ready, fn in jobs:
+            if name == "X" and os.environ.get("X_PAUSED", "").lower() == "true":
+                print(f"[X] 一時停止中（GitHub の変数 X_PAUSED=true）のためスキップ: {d}")
+                continue
             if not ready():
                 print(f"[{name}] キー未設定のためスキップ: {d}")
                 continue
