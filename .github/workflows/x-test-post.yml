@@ -1,0 +1,31 @@
+name: x-test-post
+
+# X だけに1件投稿して、新しい方式（OAuth 2.0）で投稿できるか確かめる（手動で実行）。
+# 本文は公開される。Instagram には出さない。
+on:
+  workflow_dispatch:
+    inputs:
+      text:
+        description: "X に投稿する本文（URL は入れない）"
+        required: true
+
+concurrency: publish
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests requests-oauthlib
+      - env:
+          TEXT: ${{ github.event.inputs.text }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          X_CLIENT_ID: ${{ secrets.X_CLIENT_ID }}
+          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
+          X_REFRESH_TOKEN: ${{ secrets.X_REFRESH_TOKEN }}
+          SECRETS_PAT: ${{ secrets.SECRETS_PAT }}
+        run: python scripts/x_test_post.py
