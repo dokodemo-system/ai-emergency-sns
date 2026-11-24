@@ -1,0 +1,18 @@
+{
+ "date": "2026-11-24",
+ "mode": "自動で作る",
+ "design": "B",
+ "targets": [
+  "Instagram",
+  "X",
+  "Threads",
+  "公式LINE"
+ ],
+ "source": "theme:火",
+ "type": "carousel",
+ "theme": "",
+ "slides": [],
+ "caption_ig": "",
+ "hashtags": [],
+ "x_text": ""
+}
