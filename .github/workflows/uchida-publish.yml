@@ -1,0 +1,47 @@
+name: uchida-publish
+
+# 【試作】uchida-demo ブランチに posts-uchida/<日付>-<作り方>/ が push されたら、
+# 設定で選んだ投稿先（Instagram・X・Threads）に出して、スプシの実行ログに結果を書く。
+on:
+  push:
+    branches: [uchida-demo]
+    paths: ["posts-uchida/**"]
+
+concurrency: publish
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests requests-oauthlib
+      - name: 新しい投稿フォルダを探す
+        id: find
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE=$(git merge-base origin/main HEAD)
+          fi
+          DIRS=$(git diff --name-only --diff-filter=A "$BEFORE" "${{ github.sha }}" -- 'posts-uchida/*/post.json' | xargs -r -n1 dirname | sort -u | tr '\n' ' ')
+          echo "対象: $DIRS"
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+      - name: 投稿
+        if: steps.find.outputs.dirs != ''
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          X_CLIENT_ID: ${{ secrets.X_CLIENT_ID }}
+          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
+          X_REFRESH_TOKEN: ${{ secrets.X_REFRESH_TOKEN }}
+          SECRETS_PAT: ${{ secrets.SECRETS_PAT }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          UCHIDA_GAS_URL: ${{ secrets.UCHIDA_GAS_URL }}
+          UCHIDA_TOKEN: ${{ secrets.UCHIDA_TOKEN }}
+        run: python scripts/uchida_publish.py ${{ steps.find.outputs.dirs }}

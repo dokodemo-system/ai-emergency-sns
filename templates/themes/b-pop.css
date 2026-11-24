@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap');
+/* 見本B「ポップ」：黄×黒、太いフチと影、吹き出し、＼見出し／、保存版スタンプ */
+:root{--y:#ffe14a;--k:#141414;--r:#ff3b3b;--b:#2f6bff;--g:#19b46b}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;overflow:hidden;background:var(--y)}
+body{font-family:"M PLUS Rounded 1c","Noto Sans JP","Yu Gothic",sans-serif;color:var(--k)}
+.slide{display:none;width:1080px;height:1350px;position:relative;padding:92px 84px 128px;
+  background:radial-gradient(circle,rgba(20,20,20,.10) 3px,transparent 3.6px) 0 0/36px 36px,var(--y)}
+.slide.on{display:flex;flex-direction:column}
+.dark{background:radial-gradient(circle,rgba(255,225,74,.15) 3px,transparent 3.6px) 0 0/36px 36px,var(--k);color:#fff}
+.brand{display:flex;align-items:center;gap:16px;font-family:"Dela Gothic One",sans-serif;font-size:34px;letter-spacing:.04em}
+.pulse{width:64px;height:64px;border-radius:16px;background:var(--r);display:grid;place-items:center;border:4px solid var(--k);box-shadow:5px 5px 0 var(--k)}
+.dark .pulse{border-color:#fff;box-shadow:5px 5px 0 var(--y)}
+.tag{align-self:flex-start;font-family:"Dela Gothic One",sans-serif;font-size:40px;letter-spacing:.04em;color:var(--k)}
+.tag::before{content:"＼ "}.tag::after{content:" ／"}
+.dark .tag{color:var(--y)}
+h1{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:92px;line-height:1.24}
+.dark h1{text-shadow:6px 6px 0 var(--r)}
+h2{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:70px;line-height:1.3}
+em{font-style:normal;color:#fff;background:var(--r);padding:0 12px;border-radius:10px;-webkit-box-decoration-break:clone;box-decoration-break:clone;text-shadow:none}
+.dark em{color:var(--k);background:var(--y)}
+b{color:var(--r)}
+.dark b{color:var(--y)}
+p.lead{align-self:flex-start;font-size:35px;line-height:1.55;font-weight:900;color:var(--k);background:#fff;border:5px solid var(--k);border-radius:28px;padding:20px 30px;box-shadow:8px 8px 0 var(--k);position:relative;max-width:100%}
+p.lead::after{content:"";position:absolute;left:56px;top:-26px;border:13px solid transparent;border-bottom:18px solid var(--k)}
+.dark p.lead{background:var(--y);color:var(--k);border-color:#fff;box-shadow:8px 8px 0 var(--r)}
+.dark p.lead::after{border-bottom-color:#fff}
+.slide:has(.cta) p.lead{background:none;border:0;box-shadow:none;padding:0;color:#fff;font-size:34px}
+.slide:has(.cta) p.lead::after{display:none}
+.spacer{flex:1}
+.page{position:absolute;right:84px;bottom:56px;font-family:"Dela Gothic One",sans-serif;font-size:28px;background:var(--k);color:var(--y);padding:6px 18px;border-radius:999px}
+.dark .page{background:var(--y);color:var(--k)}
+.slide:not(:last-of-type)::before{content:"SWIPE ≫";position:absolute;left:84px;bottom:58px;font-family:"Dela Gothic One",sans-serif;font-size:28px;letter-spacing:.08em}
+.dark:not(:last-of-type)::before{color:var(--y)}
+.slide[data-n="1"]::after{content:"保存版";position:absolute;top:140px;right:84px;width:176px;height:176px;border-radius:50%;background:var(--r);color:#fff;font-family:"Dela Gothic One",sans-serif;font-size:42px;display:grid;place-items:center;transform:rotate(12deg);border:6px solid #fff;box-shadow:8px 8px 0 var(--y)}
+.card{background:#fff;border:6px solid var(--k);border-radius:28px;padding:30px 38px;box-shadow:12px 12px 0 var(--k);color:var(--k)}
+.row{display:flex;gap:24px;align-items:flex-start;font-size:39px;line-height:1.5;font-weight:900;padding:22px 0;border-bottom:4px dotted var(--k)}
+.row:last-child{border-bottom:none}
+.ico{flex:none;width:60px;height:60px;border-radius:50%;border:4px solid var(--k);display:grid;place-items:center;font-family:"Dela Gothic One",sans-serif;font-size:30px;color:#fff;margin-top:2px}
+.ico.x{background:var(--r)}.ico.v{background:var(--g)}.ico.q{background:var(--b)}
+.mock{margin-top:48px;background:#fff;color:var(--k);border:6px solid var(--k);border-radius:24px;padding:30px 36px;box-shadow:12px 12px 0 var(--r)}
+.dark .mock{border-color:#fff}
+.mock .lbl{font-size:30px;font-weight:900}
+.mock .bar{height:26px;border-radius:13px;background:#ececec;border:3px solid var(--k);margin:14px 0}
+.mock .bar[style="width:0%"]{visibility:hidden}
+.mock .err{margin-top:18px;display:inline-block;font-size:32px;font-weight:900;color:#fff;background:var(--r);padding:8px 18px;border-radius:12px;border:4px solid var(--k)}
+.step{display:flex;gap:24px;align-items:flex-start;margin-bottom:26px;background:#fff;border:5px solid var(--k);border-radius:24px;padding:20px 26px;box-shadow:9px 9px 0 var(--k)}
+.num{flex:none;width:80px;height:80px;border-radius:50%;background:var(--r);color:#fff;border:5px solid var(--k);font-family:"Dela Gothic One",sans-serif;font-size:42px;display:grid;place-items:center}
+.step h3{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:39px;line-height:1.35}
+.step p{font-size:27px;line-height:1.5;font-weight:800;color:#333;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:48px}
+.cell{background:#fff;border:5px solid var(--k);border-radius:24px;padding:30px;box-shadow:9px 9px 0 var(--k)}
+.cell h3{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:38px}
+.cell p{font-size:27px;line-height:1.55;font-weight:800;color:#333;margin-top:8px}
+.price{display:flex;justify-content:space-between;align-items:baseline;padding:18px 0;border-bottom:4px dotted var(--k)}
+.price:last-child{border-bottom:none}
+.price .n{font-family:"Dela Gothic One",sans-serif;font-size:38px}
+.price .d{font-size:25px;font-weight:800;color:#444;margin-top:4px}
+.price .y{font-family:"Dela Gothic One",sans-serif;font-size:46px;color:var(--r);white-space:nowrap}
+.qa{margin-bottom:34px;background:#fff;border:5px solid var(--k);border-radius:24px;padding:22px 28px;box-shadow:9px 9px 0 var(--k)}
+.qa .qq{font-family:"Dela Gothic One",sans-serif;font-size:38px;line-height:1.45}
+.qa .qq b{color:var(--r);margin-right:12px}
+.qa .aa{font-size:29px;font-weight:800;line-height:1.6;color:#333;margin-top:8px}
+.big{font-family:"Dela Gothic One",sans-serif;font-size:100px;line-height:1.28}
+.cta{background:var(--y);color:var(--k);border:6px solid #fff;border-radius:32px;padding:44px;text-align:center;box-shadow:12px 12px 0 var(--r)}
+.cta .bigt{font-family:"Dela Gothic One",sans-serif;font-size:78px;line-height:1.3}
+.cta .sm{font-size:32px;font-weight:900;margin-top:12px}
+.foot{font-size:30px;font-weight:900;color:#fff;line-height:1.7}

@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&family=Rampart+One&display=swap');
+/* 見本C「ビビッド」：青のグラデーション×黄色、斜めの帯、白い太字に濃い影、要チェック！のシール */
+:root{--b1:#1747ff;--b2:#00b4ff;--y:#ffe600;--k:#0b1440;--r:#ff2e63;--g:#12c27a;--soft:#e6ecff;--sub:#44507a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;overflow:hidden;background:var(--b1)}
+body{font-family:"Noto Sans JP","Yu Gothic",sans-serif;color:#fff}
+.slide{display:none;width:1080px;height:1350px;position:relative;padding:92px 84px 128px;
+  background:repeating-linear-gradient(-45deg,rgba(255,255,255,.07) 0 26px,transparent 26px 52px),linear-gradient(160deg,var(--b1) 0%,#2c6cff 50%,var(--b2) 100%)}
+.slide.on{display:flex;flex-direction:column}
+.dark{background:repeating-linear-gradient(-45deg,rgba(255,230,0,.06) 0 26px,transparent 26px 52px),linear-gradient(160deg,#0b1440 0%,#16247a 60%,#1747ff 100%)}
+.brand{display:flex;align-items:center;gap:16px;font-weight:900;font-size:34px;color:#fff}
+.pulse{width:64px;height:64px;border-radius:18px;background:var(--r);display:grid;place-items:center;border:4px solid #fff}
+.tag{align-self:flex-start;background:var(--y);color:var(--k);font-weight:900;font-size:34px;padding:8px 28px;transform:skewX(-12deg);box-shadow:8px 8px 0 var(--k);letter-spacing:.04em}
+h1{font-weight:900;font-size:96px;line-height:1.22;transform:skewX(-6deg);transform-origin:left;text-shadow:0 8px 0 var(--k)}
+h2{font-weight:900;font-size:72px;line-height:1.3;transform:skewX(-6deg);transform-origin:left;text-shadow:0 6px 0 var(--k)}
+em{font-style:normal;color:var(--y)}
+b{color:var(--y)}
+.card b,.step b{color:var(--r)}
+p.lead{align-self:stretch;font-size:35px;line-height:1.55;font-weight:900;color:#fff;background:rgba(11,20,64,.55);border-left:14px solid var(--y);padding:20px 28px}
+.slide:has(.cta) p.lead{background:none;border:0;padding:0;font-size:34px;color:#dfe6ff}
+.spacer{flex:1}
+.page{position:absolute;right:84px;bottom:56px;font-weight:900;font-size:28px;background:#fff;color:var(--k);padding:6px 18px;border-radius:999px}
+.slide:not(:last-of-type)::before{content:"SWIPE ▶▶";position:absolute;left:84px;bottom:60px;font-weight:900;font-size:28px;letter-spacing:.1em;color:var(--y)}
+.slide[data-n="1"]::after{content:"要チェック！";position:absolute;top:128px;right:70px;width:250px;height:250px;display:grid;place-items:center;white-space:nowrap;background:var(--y);color:var(--r);font-weight:900;font-size:32px;transform:rotate(-12deg);
+  clip-path:polygon(50% 0%,59% 13%,74% 5%,76% 21%,92% 19%,86% 34%,100% 42%,88% 52%,98% 66%,83% 70%,84% 86%,69% 82%,61% 97%,50% 86%,39% 97%,31% 82%,16% 86%,17% 70%,2% 66%,12% 52%,0% 42%,14% 34%,8% 19%,24% 21%,26% 5%,41% 13%)}
+.card{background:#fff;border-radius:26px;padding:30px 40px;box-shadow:0 14px 0 rgba(11,20,64,.45);color:var(--k)}
+.row{display:flex;gap:24px;align-items:flex-start;font-size:39px;line-height:1.5;font-weight:900;padding:22px 0;border-bottom:4px solid var(--soft)}
+.row:last-child{border-bottom:none}
+.ico{flex:none;width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-size:30px;font-weight:900;color:#fff;margin-top:2px;box-shadow:0 0 0 5px var(--soft)}
+.ico.x{background:var(--r)}.ico.v{background:var(--g)}.ico.q{background:var(--b1)}
+.mock{margin-top:48px;background:#fff;color:var(--k);border-radius:24px;padding:66px 36px 30px;position:relative;box-shadow:0 14px 0 rgba(11,20,64,.45);overflow:hidden}
+.mock::before{content:"● ● ●";position:absolute;inset:0 0 auto;height:44px;background:var(--soft);color:#9aa7d6;font-size:18px;letter-spacing:.3em;padding:10px 20px}
+.mock .lbl{font-size:30px;font-weight:900}
+.mock .bar{height:24px;border-radius:12px;background:var(--soft);margin:14px 0}
+.mock .err{margin-top:18px;display:inline-block;font-size:33px;font-weight:900;color:var(--k);background:var(--y);padding:6px 16px}
+.step{display:flex;gap:24px;align-items:flex-start;margin-bottom:26px;background:#fff;border-radius:24px;padding:22px 26px;box-shadow:0 12px 0 rgba(11,20,64,.4);color:var(--k)}
+.num{flex:none;width:84px;height:84px;border-radius:50%;background:var(--y);color:var(--k);font-family:"Rampart One","Noto Sans JP",sans-serif;font-size:50px;display:grid;place-items:center;box-shadow:0 0 0 6px var(--soft)}
+.step h3{font-weight:900;font-size:40px;line-height:1.35}
+.step p{font-size:28px;line-height:1.5;font-weight:700;color:var(--sub);margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:48px}
+.cell{background:#fff;border-radius:24px;padding:30px;box-shadow:0 12px 0 rgba(11,20,64,.4);color:var(--k)}
+.cell h3{font-weight:900;font-size:38px}
+.cell p{font-size:27px;line-height:1.55;font-weight:700;color:var(--sub);margin-top:8px}
+.price{display:flex;justify-content:space-between;align-items:baseline;padding:18px 0;border-bottom:4px solid var(--soft)}
+.price:last-child{border-bottom:none}
+.price .n{font-weight:900;font-size:38px}
+.price .d{font-size:25px;font-weight:700;color:var(--sub);margin-top:4px}
+.price .y{font-weight:900;font-size:48px;color:var(--r);white-space:nowrap}
+.qa{margin-bottom:30px;background:#fff;border-radius:24px;padding:22px 28px;box-shadow:0 12px 0 rgba(11,20,64,.4);color:var(--k)}
+.qa .qq{font-weight:900;font-size:38px;line-height:1.45}
+.qa .qq b{color:var(--r);margin-right:12px}
+.qa .aa{font-size:29px;font-weight:700;line-height:1.6;color:var(--sub);margin-top:8px}
+.big{font-weight:900;font-size:100px;line-height:1.26;transform:skewX(-6deg);transform-origin:left;text-shadow:0 8px 0 var(--k)}
+.cta{background:var(--y);color:var(--k);border:6px solid #fff;border-radius:30px;padding:44px;text-align:center;box-shadow:0 14px 0 rgba(0,0,0,.35)}
+.cta .bigt{font-weight:900;font-size:78px;line-height:1.3}
+.cta .sm{font-size:32px;font-weight:900;margin-top:12px}
+.foot{font-size:30px;font-weight:900;color:#dfe6ff;line-height:1.7}

@@ -2,3 +2,5 @@ __pycache__/
 _slides.html
 _*.png
 _list.txt
+demo/input.json
+demo/context.json
