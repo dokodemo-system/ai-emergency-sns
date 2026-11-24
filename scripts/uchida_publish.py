@@ -72,31 +72,29 @@ def to_threads(post_dir, spec):
 JOBS = {"Instagram": to_instagram, "X": to_x, "Threads": to_threads}
 
 
-def main(dirs):
-    failed = False
-    for d in dirs:
-        d = d.rstrip("/")
-        spec = json.loads(Path(d, "post.json").read_text(encoding="utf-8"))
-        res, ids = {}, {}
-        for name in spec.get("targets", []):
-            if name == "公式LINE":
-                res[name] = "友だちへ一斉配信（試作ではイメージ）"
-                continue
-            try:
-                ids[name], res[name] = JOBS[name](d, spec)
-                print(f"[{name}] 投稿しました: {res[name]}")
-            except Exception as e:  # 1つ失敗しても、ほかの投稿先は続ける
-                failed = True
-                res[name] = f"失敗：{e}"[:300]
-                print(f"::error::[{name}] {d}: {e}")
-        ok = not any(str(v).startswith("失敗") for v in res.values())
-        print(eng.gas_log(date=spec["date"].replace("-", "/"), mode=spec.get("mode", ""), design=spec.get("design", ""),
-                          result="投稿しました" if ok else "一部失敗（内田さんへ LINE でアラート・試作ではイメージ）",
-                          instagram=res.get("Instagram", "（投稿先に含めない）"), x=res.get("X", "（投稿先に含めない）"),
-                          threads=res.get("Threads", "（投稿先に含めない）"), line=res.get("公式LINE", "（投稿先に含めない）"),
-                          memo="ids " + json.dumps(ids)))
-    sys.exit(1 if failed else 0)
+def publish_dir(d):
+    """1件分を、設定で選んだ投稿先に出して、スプシの実行ログに書く。全部成功なら True。"""
+    d = d.rstrip("/")
+    spec = json.loads(Path(d, "post.json").read_text(encoding="utf-8"))
+    res, ids = {}, {}
+    for name in spec.get("targets", []):
+        if name == "公式LINE":
+            res[name] = "友だちへ一斉配信（試作ではイメージ）"
+            continue
+        try:
+            ids[name], res[name] = JOBS[name](d, spec)
+            print(f"[{name}] 投稿しました: {res[name]}")
+        except Exception as e:  # 1つ失敗しても、ほかの投稿先は続ける
+            res[name] = f"失敗：{e}"[:300]
+            print(f"::error::[{name}] {d}: {e}")
+    ok = not any(str(v).startswith("失敗") for v in res.values())
+    print(eng.gas_log(date=spec["date"].replace("-", "/"), mode=spec.get("mode", ""), design=spec.get("design", ""),
+                      result="投稿しました" if ok else "一部失敗（内田さんへ LINE でアラート・試作ではイメージ）",
+                      instagram=res.get("Instagram", "（投稿先に含めない）"), x=res.get("X", "（投稿先に含めない）"),
+                      threads=res.get("Threads", "（投稿先に含めない）"), line=res.get("公式LINE", "（投稿先に含めない）"),
+                      memo="ids " + json.dumps(ids)))
+    return ok
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(0 if all([publish_dir(d) for d in sys.argv[1:]]) else 1)

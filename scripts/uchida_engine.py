@@ -121,7 +121,8 @@ def cmd_fetch():
     print(f"読み込み: 投稿の作り方={mode_of(d)} デザイン={design_key(d)} 投稿先={targets(d)} 対象日={target_date(d)}")
 
 
-def cmd_build():
+def build():
+    """("EMPTY", 日付) / ("MANUAL", dir) / ("AUTO", dir) を返す。"""
     d = load()
     date, mode = target_date(d), mode_of(d)
     meta = {"date": date.replace("/", "-"), "mode": mode, "design": design_key(d), "targets": targets(d)}
@@ -130,16 +131,14 @@ def cmd_build():
         post = next((x for x in d["posts"] if x["投稿日"] == date), None)
         rows = sorted((x for x in d["slides"] if x["投稿日"] == date), key=lambda x: int(x["枚目"] or 0))
         if not post or not rows:
-            print(f"EMPTY {date}")
-            sys.exit(3)
+            return "EMPTY", date
         spec = {**meta, "source": "sheet", "type": "reel" if post["形式"] == "リール" else "carousel", "theme": post["テーマ"],
                 "slides": [slide_from_row(r) for r in rows], "caption_ig": post["Instagram の本文"],
                 "hashtags": [h.lstrip("#＃") for h in re.split(r"[\s、,]+", post["ハッシュタグ"]) if h.strip("#＃")],
                 "x_text": post["X の本文"]}
         out.mkdir(parents=True, exist_ok=True)
         (out / "post.json").write_text(json.dumps(spec, ensure_ascii=False, indent=1), encoding="utf-8")
-        print(f"MANUAL {out.relative_to(ROOT).as_posix()}")
-        return
+        return "MANUAL", out.relative_to(ROOT).as_posix()
     wd = WEEK[datetime.date(*map(int, date.split("/"))).weekday()]
     theme = next((x for x in d["themes"] if x["曜日"] == wd), {})
     CONTEXT.write_text(json.dumps({**meta, "weekday": wd, "theme": theme, "base": d["base"],
@@ -148,7 +147,14 @@ def cmd_build():
     skeleton = {**meta, "source": "theme:" + wd, "type": "reel" if theme.get("形式") == "リール" else "carousel",
                 "theme": "", "slides": [], "caption_ig": "", "hashtags": [], "x_text": ""}
     (out / "post.json").write_text(json.dumps(skeleton, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"AUTO {out.relative_to(ROOT).as_posix()}")
+    return "AUTO", out.relative_to(ROOT).as_posix()
+
+
+def cmd_build():
+    kind, val = build()
+    print(kind, val)
+    if kind == "EMPTY":
+        sys.exit(3)
 
 
 def cmd_render(post_dir):

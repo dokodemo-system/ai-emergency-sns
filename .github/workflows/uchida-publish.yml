@@ -1,16 +1,21 @@
-name: uchida-publish
+name: uchida-run
 
-# 【試作】uchida-demo ブランチに posts-uchida/<日付>-<作り方>/ が push されたら、
-# 設定で選んだ投稿先（Instagram・X・Threads）に出して、スプシの実行ログに結果を書く。
+# 【試作】内田さん向け SNS自動投稿の1回分を動かす（uchida-demo ブランチのみ）。
+# - demo/run.txt が変わったら：スプシを読み、設定（毎日入れる／自動で作る）に従って動く
+# - posts-uchida/*/post.json が変わったら（自動で作るの中身を Claude が書いたら）：画像を作って投稿する
+# 投稿先は設定で選んだもの（Instagram・X・Threads。公式LINE は試作ではイメージ）。結果はスプシの実行ログへ。
 on:
   push:
     branches: [uchida-demo]
-    paths: ["posts-uchida/**"]
+    paths: ["demo/run.txt", "posts-uchida/**/post.json"]
 
 concurrency: publish
 
+permissions:
+  contents: write
+
 jobs:
-  publish:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,19 +24,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests requests-oauthlib
-      - name: 新しい投稿フォルダを探す
-        id: find
+      - name: 道具の準備（画像書き出し・日本語フォント）
         run: |
-          BEFORE="${{ github.event.before }}"
-          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
-            BEFORE=$(git merge-base origin/main HEAD)
-          fi
-          DIRS=$(git diff --name-only --diff-filter=A "$BEFORE" "${{ github.sha }}" -- 'posts-uchida/*/post.json' | xargs -r -n1 dirname | sort -u | tr '\n' ' ')
-          echo "対象: $DIRS"
-          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
-      - name: 投稿
-        if: steps.find.outputs.dirs != ''
+          pip install -q requests requests-oauthlib playwright pillow
+          python -m playwright install --with-deps chromium > /dev/null
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: 実行
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
@@ -44,4 +44,5 @@ jobs:
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
           UCHIDA_GAS_URL: ${{ secrets.UCHIDA_GAS_URL }}
           UCHIDA_TOKEN: ${{ secrets.UCHIDA_TOKEN }}
-        run: python scripts/uchida_publish.py ${{ steps.find.outputs.dirs }}
+          PYTHONPATH: scripts
+        run: python scripts/uchida_ci.py "${{ github.event.before }}" "${{ github.sha }}"
