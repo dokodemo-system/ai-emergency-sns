@@ -1,0 +1,36 @@
+name: threads-test-post
+
+# 指定した日の投稿（画像＋本文）を Threads にだけ1件投稿して、動くか確かめる（手動で実行）。
+# Instagram・X には出さない。投稿は公開される。
+on:
+  workflow_dispatch:
+    inputs:
+      dir:
+        description: "Threads に投稿するフォルダ（例: posts/2026-11-23）"
+        required: true
+
+concurrency: publish
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: 投稿データを claude/posts から取り出す
+        env:
+          DIR: ${{ github.event.inputs.dir }}
+        run: |
+          git fetch origin claude/posts
+          git checkout origin/claude/posts -- "$DIR"
+          echo "MEDIA_SHA=$(git rev-parse origin/claude/posts)" >> "$GITHUB_ENV"
+      - name: Threads に投稿
+        env:
+          DIR: ${{ github.event.inputs.dir }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+        run: python scripts/threads.py "$DIR"
